@@ -1,7 +1,7 @@
 N=(-33,-31,-18,-14,14,18,31,33);K=(-17,-16,-15,-1,1,15,16,17);B=(-17,-15,15,17);R=(-16,-1,1,16)
 V=dict(zip('PNBRQKpnbrqk',(100,320,330,500,900,0)*2));I=10**9
 Z={'N':N,'K':K,'B':B,'R':R,'Q':B+R}
-n=0;C=200000;X=TimeoutError
+n=0;C=50000;X=TimeoutError
 def setup(f='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -'):
  global b,t,c,e
  p=f.split();s=''.join('.'*int(h)if h.isdigit()else h for h in p[0].replace('/',''))
@@ -124,4 +124,4 @@ while 1:
  g=P('/game',{})
  if g['status']=='done':break
  while g['status']=='your_move':
-  setup(g['fen']);m=W(2);m=al(m)if m else'';g=P('/move',{'game':g['game'],'move':m if m in g['legal_moves'] else g['legal_moves'][0]})
+  setup(g['fen']);m=W(3);m=al(m)if m else'';g=P('/move',{'game':g['game'],'move':m if m in g['legal_moves'] else g['legal_moves'][0]})
