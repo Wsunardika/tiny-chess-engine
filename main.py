@@ -1,8 +1,8 @@
 N=(-33,-31,-18,-14,14,18,31,33);K=(-17,-16,-15,-1,1,15,16,17);B=(-17,-15,15,17);R=(-16,-1,1,16)
-V=dict(zip('PNBRQKpnbrqk',(100,320,330,500,900,0)*2));I=10**9
-Z={'N':N,'K':K,'B':B,'R':R,'Q':B+R}
-n=0;C=50000;X=TimeoutError
-def setup(f='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -'):
+V=dict(zip('PNBRQKpnbrqk',(100,320,330,500,900,0)*2));I=10**9;Z=dict(N=N,K=K,B=B,R=R,Q=B+R)
+S="@@@@^^^^JJOTEEJO@EEJ@@EE@@@@@@@@',11,6@@6@EJ;@JJ;@JJ6@EJ16@@',116;;;;@EE;@EJ@EJJ@EJJ@EJJ;@EE6;;;@@@@@@@@;@@@;@@@;@@@;@@@@@EE@@@E6;;;;@@@@@EE@@EE;@EE;@@@;@@@6;;;,11666;@;;@@;;@@;;@@66;@166;,116"
+n=0;C=50000;X=TimeoutError;L=[0]*128
+def setup(f):
  global b,t,c,e
  p=f.split();s=''.join('.'*int(h)if h.isdigit()else h for h in p[0].replace('/',''))
  b=[s[i//16*8+i%16]if i%16<8 else ' 'for i in range(128)]
@@ -24,8 +24,8 @@ def A(s,w):
     break
    x+=d
  return 0
-def G(o=False):
- m=[];w=t;H=lambda x,r:m.extend((f,x,q)for q in('QRBN'if r in(0,7)else['']))
+def G(o=False,J=0):
+ m=[];w=t;H=lambda x,r:m.extend((f,x,q)for q in('QRBN'if r%7<1 else['']))
  for f,p in enumerate(b):
   if p<'A' or (p<'a')!=(w==1):continue
   u=p.upper()
@@ -52,13 +52,13 @@ def G(o=False):
      if (q<'a')!=(w==1):m.append((f,x,''))
      break
  if not o:
-  for ks,rs,ts in ((116,119,118),(116,112,114),(4,7,6),(4,0,2)):
-   r='KQkq'[(ks==4)*2+(ts<ks)]
+  for r,ks,rs,ts in(('K',116,119,118),('Q',116,112,114),('k',4,7,6),('q',4,0,2)):
    if r in c and b[rs]=='Rr'[w<0] and all(b[x]<'A'for x in range(min(ks,rs)+1,max(ks,rs))) and all(not A(x,-w)for x in range(min(ks,ts),max(ks,ts)+1)):m.append((ks,ts,''))
  for v in m[:]:
   u=D(v)
   if A(b.index('Kk'[-t<0]),t):m.remove(v)
   U(u)
+ m.sort(key=lambda v:(v==J)*1000+V.get(b[v[1]],0)*10-V[b[v[0]]],reverse=True)
  return m
 def D(m):
  global t,c,e
@@ -78,34 +78,34 @@ def U(u):
  if g is not None:
   if p in 'Kk' and abs(x-f)==2:b[x+1 if x>f else x-2]='R' if t==1 else 'r'
   b[g]=r
+def Y():
+ s=0
+ for i,p in enumerate(b):
+  if p<'A':continue
+  r=i//16;j=(r if p<'a' else 7-r)*4+min(i%16,7-i%16)
+  v=V[p]+ord(S['PNBRQK'.index(p.upper())*32+j])-64
+  s+=v if p<'a' else -v
+ return (s+30*(b.count('B')>1)-30*(b.count('b')>1))*t
 def F(d,a,be,pl):
  global n
  n+=1
  if n>C:raise X
- if d==0:
-  s=0
-  for i,p in enumerate(b):
-   if p<'A':continue
-   v=V[p];r=i//16;f=i%16;z=7-abs(f-3.5)-abs(r-3.5)
-   v+=48-8*r if p=='P' else r*8 if p=='p' else 6*z if p in 'NBnb' else 2*z if p in 'Qq' else -int(5*z) if p in 'Kk' else 0
-   s+=v if p<'a' else -v
-  s*=t;a=max(a,s)
+ if d<=0:
+  s=Y()
   if s>=be:return be
-  m=G(True)
- else:
-  m=G()
-  if not m:return pl-100000 if A(b.index('Kk'[t<0]),-t) else 0
-  m.sort(key=lambda v:V.get(b[v[1]],0)*10-V[b[v[0]]],reverse=True)
+  a=max(a,s)
+ k=b.index('Kk'[t<0])
+ m=G(d<=0 and not A(k,-t),L[pl])
+ if not m:return pl-I if A(k,-t) else a if d<=0 else 0
  for v in m:
-  u=D(v);x=-F(max(d-1,0),-be,-a,pl+1);U(u)
-  if x>=be:return be
+  u=D(v);x=-F(d-1,-be,-a,pl+1);U(u)
+  if x>=be:L[pl]=v;return be
   if x>a:a=x
  return a
-def W(md=6):
+def W():
  global n
- best=None
- for d in range(1,md+1):
-  n=0
+ n=0;best=None
+ for d in range(1,7):
   try:
    r=[]
    for m in G():
@@ -116,12 +116,12 @@ def W(md=6):
 def al(m):
  f,x,pr=m;a=lambda v:chr(97+v%16)+str(8-v//16);return a(f)+a(x)+pr.lower()
 import json,os,urllib.request as u
-E=os.environ['MAKEFUN_ENV_URL']
+E=os.getenv('MAKEFUN_ENV_URL')
 def P(p,b):
- q=u.Request(E+p,data=json.dumps(b).encode(),headers={'content-type':'application/json'})
+ q=u.Request(E+p,data=json.dumps(b).encode())
  return json.load(u.urlopen(q))
 while 1:
  g=P('/game',{})
  if g['status']=='done':break
  while g['status']=='your_move':
-  setup(g['fen']);m=W(3);m=al(m)if m else'';g=P('/move',{'game':g['game'],'move':m if m in g['legal_moves'] else g['legal_moves'][0]})
+  setup(g['fen']);m=W();m=al(m)if m else'';v=g['legal_moves'];g=P('/move',{'game':g['game'],'move':m if m in v else v[0]})
