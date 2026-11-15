@@ -106,7 +106,7 @@ def F(d,a,be,pl):
 def W():
  global n
  n=0;best=0
- if len(T)>1e5:T.clear()
+ if len(T)>1e6:T.clear()
  for d in range(1,7):
   try:
    r=[(lambda u:(-F(d-1,-I,I,1),U(u),m)[::2])(D(m))for m in G()]
